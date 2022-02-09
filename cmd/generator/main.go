@@ -1,3 +1,4 @@
+//go:build generate
 // +build generate
 
 /*
@@ -23,14 +24,14 @@ import (
 	"os"
 	"path/filepath"
 
-	tf "github.com/hashicorp/terraform-provider-hashicups/hashicups"
+	tf "github.com/grafana/terraform-provider-grafana/grafana"
 
 	"github.com/crossplane/terrajet/pkg/pipeline"
 	// Comment out the line below, if your Terraform provider uses an old
 	// version (<v2) of github.com/hashicorp/terraform-plugin-sdk.
 	// "github.com/crossplane/terrajet/pkg/types/conversion"
 
-	"github.com/crossplane-contrib/provider-jet-template/config"
+	"github.com/crossplane-contrib/provider-jet-grafana/config"
 )
 
 func main() {
@@ -41,7 +42,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("cannot calculate the absolute path of %s", os.Args[1]))
 	}
-	resourceMap := tf.Provider().ResourcesMap
+	resourceMap := tf.Provider("1.19.0")().ResourcesMap
 	// Comment out the line below instead of the above, if your Terraform
 	// provider uses an old version (<v2) of github.com/hashicorp/terraform-plugin-sdk.
 	// resourceMap := conversion.GetV2ResourceMap(tf.Provider())

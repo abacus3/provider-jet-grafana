@@ -19,11 +19,20 @@ package config
 import (
 	tjconfig "github.com/crossplane/terrajet/pkg/config"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/crossplane-contrib/provider-jet-grafana/config/alertnotification"
+	"github.com/crossplane-contrib/provider-jet-grafana/config/apikey"
+	"github.com/crossplane-contrib/provider-jet-grafana/config/datasource"
+	datasourcepermission "github.com/crossplane-contrib/provider-jet-grafana/config/datasource/permission"
+	"github.com/crossplane-contrib/provider-jet-grafana/config/folder"
+	folderpermission "github.com/crossplane-contrib/provider-jet-grafana/config/folder/permission"
+	"github.com/crossplane-contrib/provider-jet-grafana/config/organization"
+	"github.com/crossplane-contrib/provider-jet-grafana/config/team"
 )
 
 const (
-	resourcePrefix = "template"
-	modulePath     = "github.com/crossplane-contrib/provider-jet-template"
+	resourcePrefix = "grafana"
+	modulePath     = "github.com/crossplane-contrib/provider-jet-grafana"
 )
 
 // GetProvider returns provider configuration
@@ -31,15 +40,33 @@ func GetProvider(resourceMap map[string]*schema.Resource) *tjconfig.Provider {
 	defaultResourceFn := func(name string, terraformResource *schema.Resource, opts ...tjconfig.ResourceOption) *tjconfig.Resource {
 		r := tjconfig.DefaultResource(name, terraformResource)
 		// Add any provider-specific defaulting here. For example:
-		//   r.ExternalName = tjconfig.IdentifierFromProvider
+		r.ExternalName = tjconfig.IdentifierFromProvider
 		return r
 	}
 
 	pc := tjconfig.NewProvider(resourceMap, resourcePrefix, modulePath,
-		tjconfig.WithDefaultResourceFn(defaultResourceFn))
+		tjconfig.WithDefaultResourceFn(defaultResourceFn),
+		tjconfig.WithIncludeList([]string{
+			"grafana_organization$",
+			"grafana_folder",
+			// "grafana_data_source$", TODO: https://github.com/crossplane/terrajet/issues/208
+			"grafana_folder_permission$",
+			// "grafana_data_source_permission$", TODO: https://github.com/crossplane/terrajet/issues/208
+			"grafana_api_key$",
+			// "grafana_alert_notification$", TODO: https://github.com/crossplane/terrajet/issues/208
+			"grafana_team$",
+		}))
 
 	for _, configure := range []func(provider *tjconfig.Provider){
 		// add custom config functions
+		organization.Configure,
+		folder.Configure,
+		folderpermission.Configure,
+		team.Configure,
+		datasource.Configure,
+		datasourcepermission.Configure,
+		alertnotification.Configure,
+		apikey.Configure,
 	} {
 		configure(pc)
 	}

@@ -1,8 +1,9 @@
-apiVersion: template.jet.crossplane.io/v1alpha1
+apiVersion: grafana.jet.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: default
 spec:
+  orgId: 1
   credentials:
     source: Secret
     secretRef:
